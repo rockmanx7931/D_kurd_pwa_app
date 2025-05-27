@@ -1,0 +1,16 @@
+{
+  "name": "D Kurd 手蝶模擬器",
+  "short_name": "D Kurd",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#bfdbfe",
+  "theme_color": "#1e3a8a",
+  "orientation": "portrait"
+}
