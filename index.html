@@ -1,155 +1,131 @@
+
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>D Kurd 模擬器</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#bfdbfe">
-  <script>
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
-    }
-  </script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Handpan Visual Positioned</title>
   <style>
     body {
-      background-color: #bfdbfe;
-      font-family: sans-serif;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      background: #222;
       display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
+      align-items: center;
+      height: 100vh;
     }
-    .title {
-      font-size: 1.2rem;
-      font-weight: bold;
-      margin-bottom: 16px;
-    }
-    .main-container {
-      display: flex;
-      gap: 20px;
-      align-items: flex-start;
-    }
-    .wrapper {
+    #container {
       position: relative;
-      width: 90vw;
-      max-width: 600px;
-      aspect-ratio: 1 / 1;
+      width: 600px;
+      height: 600px;
+      background: url('handpan_600x600.png') no-repeat center center;
+      background-size: cover;
     }
-    .background-img {
+    .note {
       position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-    }
-    .note-btn {
-      position: absolute;
-      width: 10vw;
-      height: 10vw;
-      max-width: 60px;
-      max-height: 60px;
+      width: 60px;
+      height: 60px;
       border-radius: 50%;
-      background-color: white;
-      color: black;
-      font-weight: bold;
-      font-size: 3vw;
-      text-align: center;
-      line-height: 10vw;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-      transform: translate(-50%, -50%);
-      cursor: pointer;
-      z-index: 1;
-    }
-    .controls {
+      background: rgba(139, 195, 74, 0.85);
+      color: white;
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-    }
-    .controls label {
+      justify-content: center;
+      align-items: center;
+      font-size: 16px;
       font-weight: bold;
-      margin-bottom: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: transform 0.1s ease, background-color 0.1s ease;
     }
-    #bpmSlider {
-      width: 150px;
+    .note:active {
+      transform: scale(0.95);
+      background-color: #689f38;
     }
+    audio { display: none; }
   </style>
 </head>
 <body>
-  <h2 class="title">D Kurd 模擬器</h2>
-  <div class="main-container">
-    <div class="wrapper">
-      <img src="handpan.png" alt="Handpan" class="background-img">
-      <div class="note-btn" style="top: 40.7%; left: 46.3%;" onclick="playNote('1_D.mp3')">D1</div>
-      <div class="note-btn" style="top: 68.8%; left: 46.2%;" onclick="playNote('2_A.mp3')">A2</div>
-      <div class="note-btn" style="top: 59.3%; left: 27.5%;" onclick="playNote('3_Bb.mp3')">Bb3</div>
-      <div class="note-btn" style="top: 59.5%; left: 66.2%;" onclick="playNote('4_C.mp3')">C4</div>
-      <div class="note-btn" style="top: 43.8%; left: 19.0%;" onclick="playNote('5_D.mp3')">D5</div>
-      <div class="note-btn" style="top: 44.0%; left: 75.0%;" onclick="playNote('6_E.mp3')">E6</div>
-      <div class="note-btn" style="top: 26.3%; left: 25.5%;" onclick="playNote('7_F.mp3')">F7</div>
-      <div class="note-btn" style="top: 27.0%; left: 71.0%;" onclick="playNote('8_G.mp3')">G8</div>
-      <div class="note-btn" style="top: 15.8%; left: 39.2%;" onclick="playNote('9_A.mp3')">A9</div>
-      <div class="note-btn" style="top: 16.8%; left: 57.8%;" onclick="playNote('10_C.mp3')">C10</div>
+<div id="container">
+
+    <div class="note" style="top: 40.7%; left: 46.3%;"
+         ontouchstart="playSound('1_D')" 
+         onmousedown="playSound('1_D')">
+         D1
     </div>
-    <div class="controls">
-      <label for="bpmSlider">敲打速度: <span id="bpmValue">60</span> BPM</label>
-      <input type="range" id="bpmSlider" min="20" max="120" step="5" value="60">
+    
+    <div class="note" style="top: 68.8%; left: 46.2%;"
+         ontouchstart="playSound('2_A')" 
+         onmousedown="playSound('2_A')">
+         A2
     </div>
-  </div>
-  <script>
-    // 初始化 AudioContext 與快取
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const audioBuffers = {};
-    const files = ['1_D.mp3','2_A.mp3','3_Bb.mp3','4_C.mp3','5_D.mp3','6_E.mp3','7_F.mp3','8_G.mp3','9_A.mp3','10_C.mp3'];
-    Promise.all(files.map(name =>
-      fetch(name).then(r => r.arrayBuffer()).then(data => audioCtx.decodeAudioData(data)).then(buf => audioBuffers[name] = buf)
-    )).then(() => console.log('Audio loaded'));
+    
+    <div class="note" style="top: 59.3%; left: 27.5%;"
+         ontouchstart="playSound('3_Bb')" 
+         onmousedown="playSound('3_Bb')">
+         Bb3
+    </div>
+    
+    <div class="note" style="top: 59.5%; left: 66.2%;"
+         ontouchstart="playSound('4_C')" 
+         onmousedown="playSound('4_C')">
+         C4
+    </div>
+    
+    <div class="note" style="top: 43.8%; left: 19.0%;"
+         ontouchstart="playSound('5_D')" 
+         onmousedown="playSound('5_D')">
+         D5
+    </div>
+    
+    <div class="note" style="top: 44.0%; left: 75.0%;"
+         ontouchstart="playSound('6_E')" 
+         onmousedown="playSound('6_E')">
+         E6
+    </div>
+    
+    <div class="note" style="top: 26.3%; left: 25.5%;"
+         ontouchstart="playSound('7_F')" 
+         onmousedown="playSound('7_F')">
+         F7
+    </div>
+    
+    <div class="note" style="top: 27.0%; left: 71.0%;"
+         ontouchstart="playSound('8_G')" 
+         onmousedown="playSound('8_G')">
+         G8
+    </div>
+    
+    <div class="note" style="top: 15.8%; left: 39.2%;"
+         ontouchstart="playSound('9_A')" 
+         onmousedown="playSound('9_A')">
+         A9
+    </div>
+    
+    <div class="note" style="top: 16.8%; left: 57.8%;"
+         ontouchstart="playSound('10_C')" 
+         onmousedown="playSound('10_C')">
+         C10
+    </div>
+    
+<!-- Audio preload -->
+<audio id="1_D" src="1_D.mp3"></audio>
+<audio id="2_A" src="2_A.mp3"></audio>
+<audio id="3_Bb" src="3_Bb.mp3"></audio>
+<audio id="4_C" src="4_C.mp3"></audio>
+<audio id="5_D" src="5_D.mp3"></audio>
+<audio id="6_E" src="6_E.mp3"></audio>
+<audio id="7_F" src="7_F.mp3"></audio>
+<audio id="8_G" src="8_G.mp3"></audio>
+<audio id="9_A" src="9_A.mp3"></audio>
+<audio id="10_C" src="10_C.mp3"></audio>
 
-    // 在首次點擊時啟動 AudioContext（解鎖 iOS/Chrome 限制）
-    document.addEventListener('click', () => {
-      if (audioCtx.state === 'suspended') audioCtx.resume();
-    }, { once: true });
-
-    // BPM 控制
-    let currentBPM = 60;
-    let playbackRate = currentBPM / 60;
-    const bpmSlider = document.getElementById('bpmSlider');
-    const bpmValue = document.getElementById('bpmValue');
-    bpmSlider.addEventListener('input', e => {
-      currentBPM = Number(e.target.value);
-      playbackRate = currentBPM / 60;
-      bpmValue.textContent = currentBPM;
-    });
-
-    // 播放緩衝音訊
-    function playBuffer(name) {
-      const buf = audioBuffers[name];
-      if (!buf) return;
-      const src = audioCtx.createBufferSource();
-      src.buffer = buf;
-      src.playbackRate.value = playbackRate;
-      src.connect(audioCtx.destination);
-      src.start(0);
-    }
-
-    // 通用播放函式，支援 polyphony 與 fallback
-    function playNote(file) {
-      if (audioBuffers[file]) {
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume().then(() => playBuffer(file));
-        } else {
-          playBuffer(file);
-        }
-      } else {
-        // fallback to HTMLAudioElement
-        const audioEl = new Audio(file);
-        audioEl.playbackRate = playbackRate;
-        audioEl.play();
-      }
-    }
-  </script>
+</div>
+<script>
+function playSound(id) {
+  const audio = document.getElementById(id);
+  audio.currentTime = 0;
+  audio.play();
+}
+</script>
 </body>
 </html>
