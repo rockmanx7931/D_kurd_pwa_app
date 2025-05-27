@@ -1,36 +1,36 @@
-
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-  <meta charset="UTF-8" />
+  <meta charset="UTF-8">
   <title>D Kurd 模擬器</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="manifest" href="manifest.json" />
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#bfdbfe">
   <script>
     if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js');
-      });
+      window.addEventListener('load', () => navigator.serviceWorker.register('service-worker.js'));
     }
   </script>
   <style>
     body {
       background-color: #bfdbfe;
       font-family: sans-serif;
+      margin: 0;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      padding: 20px;
     }
     .title {
-      margin-top: 20px;
       font-size: 1.2rem;
       font-weight: bold;
-      text-align: center;
+      margin-bottom: 16px;
+    }
+    .main-container {
+      display: flex;
+      gap: 20px;
+      align-items: flex-start;
     }
     .wrapper {
       position: relative;
@@ -64,27 +64,91 @@
       cursor: pointer;
       z-index: 1;
     }
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .controls label {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+    #bpmSlider {
+      width: 150px;
+    }
   </style>
 </head>
 <body>
   <h2 class="title">D Kurd 模擬器</h2>
-  <div class="wrapper">
-    <img src="handpan.png" alt="Handpan" class="background-img">
-    <div class="note-btn" style="top: 40.7%; left: 46.3%;" onclick="playSound('1_D.mp3')">D1</div>
-    <div class="note-btn" style="top: 68.8%; left: 46.2%;" onclick="playSound('2_A.mp3')">A2</div>
-    <div class="note-btn" style="top: 59.3%; left: 27.5%;" onclick="playSound('3_Bb.mp3')">Bb3</div>
-    <div class="note-btn" style="top: 59.5%; left: 66.2%;" onclick="playSound('4_C.mp3')">C4</div>
-    <div class="note-btn" style="top: 43.8%; left: 19.0%;" onclick="playSound('5_D.mp3')">D5</div>
-    <div class="note-btn" style="top: 44.0%; left: 75.0%;" onclick="playSound('6_E.mp3')">E6</div>
-    <div class="note-btn" style="top: 26.3%; left: 25.5%;" onclick="playSound('7_F.mp3')">F7</div>
-    <div class="note-btn" style="top: 27.0%; left: 71.0%;" onclick="playSound('8_G.mp3')">G8</div>
-    <div class="note-btn" style="top: 15.8%; left: 39.2%;" onclick="playSound('9_A.mp3')">A9</div>
-    <div class="note-btn" style="top: 16.8%; left: 57.8%;" onclick="playSound('10_C.mp3')">C10</div>
+  <div class="main-container">
+    <div class="wrapper">
+      <img src="handpan.png" alt="Handpan" class="background-img">
+      <div class="note-btn" style="top: 40.7%; left: 46.3%;" onclick="playNote('1_D.mp3')">D1</div>
+      <div class="note-btn" style="top: 68.8%; left: 46.2%;" onclick="playNote('2_A.mp3')">A2</div>
+      <div class="note-btn" style="top: 59.3%; left: 27.5%;" onclick="playNote('3_Bb.mp3')">Bb3</div>
+      <div class="note-btn" style="top: 59.5%; left: 66.2%;" onclick="playNote('4_C.mp3')">C4</div>
+      <div class="note-btn" style="top: 43.8%; left: 19.0%;" onclick="playNote('5_D.mp3')">D5</div>
+      <div class="note-btn" style="top: 44.0%; left: 75.0%;" onclick="playNote('6_E.mp3')">E6</div>
+      <div class="note-btn" style="top: 26.3%; left: 25.5%;" onclick="playNote('7_F.mp3')">F7</div>
+      <div class="note-btn" style="top: 27.0%; left: 71.0%;" onclick="playNote('8_G.mp3')">G8</div>
+      <div class="note-btn" style="top: 15.8%; left: 39.2%;" onclick="playNote('9_A.mp3')">A9</div>
+      <div class="note-btn" style="top: 16.8%; left: 57.8%;" onclick="playNote('10_C.mp3')">C10</div>
+    </div>
+    <div class="controls">
+      <label for="bpmSlider">敲打速度: <span id="bpmValue">60</span> BPM</label>
+      <input type="range" id="bpmSlider" min="20" max="120" step="5" value="60">
+    </div>
   </div>
   <script>
-    function playSound(file) {
-      const audio = new Audio(file);
-      audio.play();
+    // 初始化 AudioContext 與快取
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const audioBuffers = {};
+    const files = ['1_D.mp3','2_A.mp3','3_Bb.mp3','4_C.mp3','5_D.mp3','6_E.mp3','7_F.mp3','8_G.mp3','9_A.mp3','10_C.mp3'];
+    Promise.all(files.map(name =>
+      fetch(name).then(r => r.arrayBuffer()).then(data => audioCtx.decodeAudioData(data)).then(buf => audioBuffers[name] = buf)
+    )).then(() => console.log('Audio loaded'));
+
+    // 在首次點擊時啟動 AudioContext（解鎖 iOS/Chrome 限制）
+    document.addEventListener('click', () => {
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    }, { once: true });
+
+    // BPM 控制
+    let currentBPM = 60;
+    let playbackRate = currentBPM / 60;
+    const bpmSlider = document.getElementById('bpmSlider');
+    const bpmValue = document.getElementById('bpmValue');
+    bpmSlider.addEventListener('input', e => {
+      currentBPM = Number(e.target.value);
+      playbackRate = currentBPM / 60;
+      bpmValue.textContent = currentBPM;
+    });
+
+    // 播放緩衝音訊
+    function playBuffer(name) {
+      const buf = audioBuffers[name];
+      if (!buf) return;
+      const src = audioCtx.createBufferSource();
+      src.buffer = buf;
+      src.playbackRate.value = playbackRate;
+      src.connect(audioCtx.destination);
+      src.start(0);
+    }
+
+    // 通用播放函式，支援 polyphony 與 fallback
+    function playNote(file) {
+      if (audioBuffers[file]) {
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().then(() => playBuffer(file));
+        } else {
+          playBuffer(file);
+        }
+      } else {
+        // fallback to HTMLAudioElement
+        const audioEl = new Audio(file);
+        audioEl.playbackRate = playbackRate;
+        audioEl.play();
+      }
     }
   </script>
 </body>
